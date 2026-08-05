@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Kalué Beauty 💄{% endblock %}
+
+{% block content %}
+
+<header>
+    <h1>✨ KALUÉ STORE ✨</h1>
+    <p>Inspirando tu propia belleza</p>
+</header>
+
+<div class="buscador">
+    <input type="text" id="campoBusqueda"
+           placeholder="🔍 Buscar producto..."
+           onkeyup="buscar()">
+</div>
+
+<nav class="categorias">
+    <div class="tabs-principales">
+        <button class="tab activo" onclick="filtrarCategoria('todos', this)">
+            🛍️ Todos
+        </button>
+        {% for categoria in categorias %}
+        <button class="tab" onclick="filtrarCategoria('{{ categoria.name|lower }}', this)">
+            {{ categoria.name }}
+        </button>
+        {% endfor %}
+    </div>
+
+    {% for categoria in categorias %}
+    <div class="tabs-sub" id="sub-{{ categoria.name|lower }}" style="display:none">
+        {% for sub in categoria.subcategories.all %}
+        <button class="subtab" onclick="filtrarSub('{{ sub.name|lower }}', this)">
+            {{ sub.name }}
+        </button>
+        {% endfor %}
+    </div>
+    {% endfor %}
+</nav>
+
+<main>
+    <div class="galeria">
+        {% for producto in productos %}
+        <a class="tarjeta {% if not producto.is_available %}agotado{% endif %}"
+           href="{% url 'producto_detalle' producto.pk %}"
+           data-categoria="{{ producto.subcategory.category.name|lower }}"
+           data-subcategoria="{{ producto.subcategory.name|lower }}">
+
+            {% if producto.main_image %}
+            <img src="{{ producto.main_image }}" alt="{{ producto.name }}">
+            {% else %}
+            <div style="height:220px; background:#f0e0e5; display:flex; align-items:center; justify-content:center;">
+                <p>Sin imagen</p>
+            </div>
+            {% endif %}
+
+            {% if not producto.is_available %}
+            <div class="badge-agotado">AGOTADO</div>
+            {% endif %}
+
+            <div class="info">
+                <h3>{{ producto.name }}</h3>
+                <p class="marca">{{ producto.brand }}</p>
+                <p class="frase">{{ producto.short_description }}</p>
+                {% if producto.active_variants %}
+                <p class="precio">
+                    Bs. {{ producto.active_variants.first.selling_price }}
+                </p>
+                {% endif %}
+            </div>
+
+        </a>
+        {% endfor %}
+    </div>
+</main>
+
+<footer>
+    <p>📍 Cochabamba, Bolivia &nbsp;|&nbsp; 📱 WhatsApp: {{ whatsapp_number }}</p>
+</footer>
+
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ producto.name }} — Kalué Beauty{% endblock %}
+
+{% block content %}
+
+<header>
+    <h1>✨ KALUÉ STORE ✨</h1>
+    <p><a href="{% url 'index' %}" style="color:white">← Volver al catálogo</a></p>
+</header>
+
+<main class="detalle-container">
+
+    <div class="detalle-galeria">
+        <img id="fotoPrincipal"
+             src="{{ producto.main_image }}"
+             alt="{{ producto.name }}">
+
+        <div class="miniaturas">
+            {% for foto in producto.all_images|slice:"1:" %}
+            <img src="{{ foto }}"
+                 alt="{{ producto.name }}"
+                 class="miniatura"
+                 onclick="cambiarFoto(this, '{{ foto }}')">
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="detalle-info">
+        <p class="detalle-marca">{{ producto.brand }}</p>
+        <h1 class="detalle-nombre">{{ producto.name }}</h1>
+        <p class="detalle-frase">{{ producto.short_description }}</p>
+
+        {% if variantes %}
+        <div class="detalle-variantes">
+            <p class="variantes-label">Selecciona una opción:</p>
+            <div class="variantes-opciones">
+                {% for variante in variantes %}
+                <button class="variante-btn {% if forloop.first %}seleccionada{% endif %}"
+                        data-precio="{{ variante.selling_price }}"
+                        data-variante="{{ variante.color_or_number }}"
+                        data-disponible="{{ variante.is_available|yesno:'true,false' }}"
+                        onclick="seleccionarVariante(this)">
+                    {{ variante.color_or_number|default:"Única" }}
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <p class="detalle-precio" id="precioActual">
+            Bs. {{ variantes.first.selling_price }}
+        </p>
+
+        <p class="detalle-disponible" id="disponibilidad">
+            {% if producto.is_available %}
+            ✅ Disponible
+            {% else %}
+            ❌ Agotado
+            {% endif %}
+        </p>
+
+        <div class="detalle-descripcion">
+            <p>{{ producto.detailed_description }}</p>
+        </div>
+
+        <a class="btn-whatsapp"
+           id="btnWhatsapp"
+           href="https://wa.me/{{ whatsapp_number }}?text=Hola!%20Me%20interesa%20el%20producto:%20{{ producto.name }}"
+           target="_blank">
+            💬 Pedir por WhatsApp
+        </a>
+    </div>
+
+</main>
+
+{% endblock %}
+
+{% block extra_js %}
+{% load static %}
+<script>
+    const WHATSAPP = '{{ whatsapp_number }}';
+    const PRODUCTO = '{{ producto.name }}';
+</script>
+<script src="{% static 'js/producto_detalle.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Kalué Beauty{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    {% block content %}{% endblock %}
+
+    <a class="whatsapp-flotante"
+       href="https://wa.me/{{ whatsapp_number }}?text=Hola!%20Quisiera%20información%20sobre%20sus%20productos"
+       target="_blank">💬</a>
+
+    <!-- Variable global disponible para todo el JS -->
+    <script>
+        const NUMERO_WHATSAPP = '{{ whatsapp_number }}';
+    </script>
+
+    <script src="{% static 'js/script.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+
+</body>
+</html>
