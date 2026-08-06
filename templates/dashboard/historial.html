@@ -16,6 +16,7 @@
                 <th>Cantidad</th>
                 <th>Stock anterior</th>
                 <th>Stock nuevo</th>
+                <th>Registrado por</th>
                 <th>Razón</th>
             </tr>
         </thead>
@@ -37,6 +38,7 @@
                 <td>{{ m.quantity }}</td>
                 <td>{{ m.previous_stock }}</td>
                 <td>{{ m.new_stock }}</td>
+                <td>{{ m.admin.username|default:"—" }}</td>
                 <td style="color:var(--gris); font-size:0.85rem">
                     {{ m.reason|default:"—" }}
                 </td>

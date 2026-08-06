@@ -15,8 +15,10 @@
         <thead>
             <tr>
                 <th>Fecha</th>
-                <th>Total</th>
+                <th>Precio de compra</th>
+                <th>Precio de venta</th>
                 <th>Descuento</th>
+                <th>Ganancia</th>
                 <th>Nota</th>
                 <th>Registrado por</th>
             </tr>
@@ -24,11 +26,13 @@
         <tbody>
             {% for v in ventas %}
             <tr>
-                <td>{{ v.created_at|date:"d/m/Y H:i" }}</td>
-                <td><strong>Bs. {{ v.total }}</strong></td>
-                <td>{% if v.discount %}Bs. {{ v.discount }}{% else %}—{% endif %}</td>
-                <td style="color:var(--gris)">{{ v.note|default:"—" }}</td>
-                <td>{{ v.admin.username|default:"—" }}</td>
+                <td>{{ v.venta.created_at|date:"d/m/Y H:i" }}</td>
+                <td>Bs. {{ v.precio_compra }}</td>
+                <td><strong>Bs. {{ v.precio_venta }}</strong></td>
+                <td>{% if v.venta.discount %}Bs. {{ v.venta.discount }}{% else %}—{% endif %}</td>
+                <td>Bs. {{ v.ganancia }}</td>
+                <td style="color:var(--gris)">{{ v.venta.note|default:"—" }}</td>
+                <td>{{ v.venta.admin.username|default:"—" }}</td>
             </tr>
             {% empty %}
             <tr>

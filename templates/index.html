@@ -6,7 +6,15 @@
 {% block content %}
 
 <header>
-    <h1>✨ KALUÉ BEAUTY STORE ✨</h1>
+    <div style="display:flex; justify-content:flex-end; padding:10px 20px 0">
+        <a href="{% url 'dashboard_login' %}"
+           style="color:white; font-size:0.85rem; opacity:0.8;
+                  text-decoration:none; border:1px solid rgba(255,255,255,0.4);
+                  padding:6px 14px; border-radius:20px">
+            🔐 Acceso personal
+        </a>
+    </div>
+    <h1>✨ KALUÉ STORE ✨</h1>
     <p>Inspirando tu propia belleza</p>
 </header>
 

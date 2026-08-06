@@ -1,9 +1,20 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.conf import settings
 from .models import (Product, Category, Subcategory, ProductVariant,
                      ProductImage, Stock, PurchaseLot, StockMovement, Sale)
+from django.contrib.auth import authenticate, login,  logout
+
+
+def es_admin(user):
+    return user.is_superuser
+
+def es_vendedor_o_admin(user):
+    return user.is_superuser or user.groups.filter(name='Vendedor').exists()
+
+admin_required    = user_passes_test(es_admin,            login_url='/admin/login/')
+vendedor_required = user_passes_test(es_vendedor_o_admin, login_url='/admin/login/')
 
 def index(request):
     productos  = Product.objects.filter(active=True).prefetch_related(
@@ -30,20 +41,25 @@ def producto_detalle(request, pk):
     })
 
 
-@login_required(login_url='/admin/login/')
+@vendedor_required
 def dashboard(request):
-    productos   = Product.objects.all()
+    productos        = Product.objects.all()
     total_productos  = productos.count()
     total_activos    = productos.filter(active=True).count()
     total_agotados   = sum(1 for p in productos if not p.is_available)
-    movimientos      = StockMovement.objects.order_by('-created_at')[:5]
-
+    movimientos      = StockMovement.objects.select_related('variant__product', 'admin').order_by('-created_at')[:5]
     variantes        = ProductVariant.objects.prefetch_related('lots').all()
-    ganancia_total   = sum(
-        lote.total_profit
-        for v in variantes
-        for lote in v.lots.all()
-    )
+
+    ventas = Sale.objects.all()
+    total_ingresos  = sum(v.total for v in ventas)
+    total_descuentos = sum(v.discount for v in ventas)
+
+    movimientos_venta = StockMovement.objects.filter(type='venta').select_related('lot')
+    total_costos = sum(m.quantity * m.lot.purchase_price for m in movimientos_venta)
+
+    ganancia_total = total_ingresos - total_costos
+
+    dinero_acumulado = (ganancia_total + total_costos)
 
     return render(request, 'dashboard/index.html', {
         'total_productos': total_productos,
@@ -51,9 +67,13 @@ def dashboard(request):
         'total_agotados':  total_agotados,
         'movimientos':     movimientos,
         'ganancia_total':  ganancia_total,
+        'total_ingresos':   total_ingresos,
+        'total_descuentos': total_descuentos,
+        'total_costos':     total_costos,
+        'dinero_acumulado': dinero_acumulado,
     })
 
-@login_required(login_url='/admin/login/')
+@vendedor_required
 def dashboard_productos(request):
     productos = Product.objects.prefetch_related(
         'images', 'variants__stock'
@@ -62,7 +82,7 @@ def dashboard_productos(request):
         'productos': productos,
     })
 
-@login_required(login_url='/admin/login/')
+@admin_required
 def dashboard_agregar(request):
     categorias   = Category.objects.prefetch_related('subcategories').all()
     subcategorias = Subcategory.objects.all()
@@ -111,7 +131,7 @@ def dashboard_agregar(request):
         'producto':     None,
     })
 
-@login_required(login_url='/admin/login/')
+@admin_required
 def dashboard_editar(request, pk):
     producto     = get_object_or_404(Product, pk=pk)
     categorias   = Category.objects.prefetch_related('subcategories').all()
@@ -134,7 +154,7 @@ def dashboard_editar(request, pk):
         'producto':      producto,
     })
 
-@login_required(login_url='/admin/login/')
+@admin_required
 def dashboard_eliminar(request, pk):
     producto = get_object_or_404(Product, pk=pk)
     nombre   = producto.name
@@ -142,7 +162,7 @@ def dashboard_eliminar(request, pk):
     messages.success(request, f'🗑️ Producto "{nombre}" eliminado')
     return redirect('dashboard_productos')
 
-@login_required(login_url='/admin/login/')
+@vendedor_required
 def dashboard_stock(request):
     variantes = ProductVariant.objects.prefetch_related(
         'stock', 'lots'
@@ -151,7 +171,7 @@ def dashboard_stock(request):
         'variantes': variantes,
     })
 
-@login_required(login_url='/admin/login/')
+@admin_required
 def dashboard_agregar_lote(request):
     variantes = ProductVariant.objects.select_related('product').filter(active=True)
 
@@ -171,16 +191,16 @@ def dashboard_agregar_lote(request):
         'variantes': variantes,
     })
 
-@login_required(login_url='/admin/login/')
+@vendedor_required
 def dashboard_historial(request):
     movimientos = StockMovement.objects.select_related(
-        'variant__product', 'lot'
+        'variant__product', 'lot', 'admin'
     ).order_by('-created_at')
     return render(request, 'dashboard/historial.html', {
         'movimientos': movimientos,
     })
 
-@login_required(login_url='/admin/login/')
+@admin_required
 def dashboard_agregar_variante(request, pk):
     producto = get_object_or_404(Product, pk=pk)
 
@@ -201,14 +221,39 @@ def dashboard_agregar_variante(request, pk):
         'producto': producto,
     })
 
-@login_required(login_url='/admin/login/')
+@vendedor_required
 def dashboard_ventas(request):
     ventas = Sale.objects.select_related('admin').order_by('-created_at')
-    return render(request, 'dashboard/ventas.html', {
-        'ventas': ventas,
-    })
 
-@login_required(login_url='/admin/login/')
+    ventas_con_datos = []
+    total_compras = 0
+    total_ventas  = 0
+    total_ganancias = 0
+
+    for venta in ventas:
+        movimiento = StockMovement.objects.select_related(
+            'lot', 'variant'
+        ).filter(sale=venta, type='venta').first()
+
+        precio_compra = 0
+        precio_venta  = venta.total
+        ganancia      = 0
+    
+        if movimiento:
+            precio_compra = movimiento.lot.purchase_price * movimiento.quantity
+            ganancia      = precio_venta - precio_compra
+
+        ventas_con_datos.append({
+            'venta':         venta,
+            'precio_compra': precio_compra,
+            'precio_venta':  precio_venta,
+            'ganancia':      ganancia,
+        })
+
+    return render(request, 'dashboard/ventas.html', {
+        'ventas': ventas_con_datos,
+    })
+@vendedor_required
 def dashboard_registrar_venta(request):
     variantes = ProductVariant.objects.select_related('product').filter(
         active=True,
@@ -218,6 +263,7 @@ def dashboard_registrar_venta(request):
     if request.method == 'POST':
         variante_id = int(request.POST['variante'])
         cantidad    = int(request.POST['cantidad'])
+        descuento = int(request.POST.get('descuento', 0))
         nota        = request.POST.get('nota', '')
 
         variante = get_object_or_404(ProductVariant, pk=variante_id)
@@ -241,11 +287,11 @@ def dashboard_registrar_venta(request):
         lote.remaining_amount -= cantidad
         lote.save()
 
-        total = variante.selling_price * cantidad
+        total   = (variante.selling_price * cantidad) - descuento
         venta = Sale.objects.create(
             admin    = request.user,
             total    = total,
-            discount = 0,
+            discount = descuento,
             note     = nota
         )
 
@@ -260,9 +306,48 @@ def dashboard_registrar_venta(request):
             reason         = f'Venta #{venta.id} — {nota}'
         )
 
-        messages.success(request, f'✅ Venta registrada — {cantidad} x {variante.product.name} ({variante.color_or_number}) — Bs. {total}')
+        messages.success(request, f'✅ Venta registrada — {cantidad} x {variante.product.name} '
+                                  f'({variante.color_or_number}) — '
+                                  f'{"Descuento: Bs." + str(descuento) + " — " if descuento else ""}'
+                                  f'Total: Bs. {total}')
+
         return redirect('dashboard_ventas')
 
     return render(request, 'dashboard/registrar_venta.html', {
         'variantes': variantes,
     })
+
+def es_admin(user):
+    return user.is_superuser
+
+def es_vendedor_o_admin(user):
+    return user.is_superuser or user.groups.filter(name='Vendedor').exists()
+
+def dashboard_login(request):
+    if request.user.is_authenticated and es_vendedor_o_admin(request.user):
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user     = authenticate(request, username=username, password=password)
+
+        if user and es_vendedor_o_admin(user):
+            login(request, user)
+            return redirect('dashboard')
+        else:
+            messages.error(request, '❌ Usuario o contraseña incorrectos')
+
+    return render(request, 'dashboard/login.html')
+
+def dashboard_logout(request):
+    logout(request)
+    return redirect('dashboard_login')
+
+def dashboard_logout(request):
+    logout(request)
+    return redirect('/admin/login/')
+
+
+admin_required    = user_passes_test(es_admin,            login_url='/dashboard/login/')
+vendedor_required = user_passes_test(es_vendedor_o_admin, login_url='/dashboard/login/')

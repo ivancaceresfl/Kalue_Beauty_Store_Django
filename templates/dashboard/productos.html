@@ -7,7 +7,9 @@
 
 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
     <p style="color:var(--gris)">{{ productos.count }} productos en total</p>
+    {% if request.user.is_superuser %}
     <a href="{% url 'dashboard_agregar' %}" class="btn-primary">➕ Agregar producto</a>
+    {% endif %}
 </div>
 
 <div class="dashboard-section">
@@ -52,13 +54,17 @@
                     <span class="badge-agotado-small">❌ Agotado</span>
                     {% endif %}
                 </td>
+                {% if request.user.is_superuser %}
                 <td>
                     <div style="display:flex; gap:8px">
                         <a href="{% url 'dashboard_editar' p.pk %}" class="btn-secondary">✏️ Editar</a>
                         <a href="{% url 'dashboard_eliminar' p.pk %}" class="btn-danger"
-                           onclick="return confirm('¿Eliminar {{ p.name }}?')">🗑️</a>
+                            onclick="return confirm('¿Eliminar {{ p.name }}?')">🗑️</a>
                     </div>
                 </td>
+                {% else %}
+                <td>—</td>
+                {% endif %}
             </tr>
             {% empty %}
             <tr>

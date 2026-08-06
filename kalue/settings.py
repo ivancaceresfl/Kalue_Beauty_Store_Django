@@ -85,3 +85,5 @@ STATIC_ROOT      = BASE_DIR / 'staticfiles'
 WHATSAPP_NUMBER = os.environ.get('WHATSAPP_NUMBER', '')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True

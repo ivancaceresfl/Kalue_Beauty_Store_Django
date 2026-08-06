@@ -17,21 +17,19 @@
         </div>
 
         <nav class="sidebar-nav">
-            <a href="{% url 'dashboard' %}"
-               class="{% if request.resolver_match.url_name == 'dashboard' %}activo{% endif %}"> 📊 Inicio </a>
-            <a href="{% url 'dashboard_productos' %}"
-               class="{% if 'producto' in request.resolver_match.url_name %}activo{% endif %}"> 💄 Productos </a>
-            <a href="{% url 'dashboard_stock' %}"
-               class="{% if 'stock' in request.resolver_match.url_name %}activo{% endif %}"> 📦 Stock </a>
-            <a href="{% url 'dashboard_historial' %}"
-               class="{% if request.resolver_match.url_name == 'dashboard_historial' %}activo{% endif %}"> 📋 Historial </a>
-            <a href="{% url 'dashboard_ventas' %}"
-               class="{% if 'venta' in request.resolver_match.url_name %}activo{% endif %}"> 💰 Ventas </a>
+            <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}activo{% endif %}"> 📊 Inicio </a>
+            <a href="{% url 'dashboard_productos' %}" class="{% if 'producto' in request.resolver_match.url_name %}activo{% endif %}"> 💄 Productos  </a>
+            <a href="{% url 'dashboard_ventas' %}" class="{% if 'venta' in request.resolver_match.url_name %}activo{% endif %}"> 💰 Ventas </a>
+
+            {% if request.user.is_superuser %}
+            <a href="{% url 'dashboard_stock' %}" class="{% if 'stock' in request.resolver_match.url_name %}activo{% endif %}"> 📦 Stock </a>
+            <a href="{% url 'dashboard_historial' %}" class="{% if request.resolver_match.url_name == 'dashboard_historial' %}activo{% endif %}"> 📋 Historial </a>
+            {% endif %}
         </nav>
 
         <div class="sidebar-footer">
             <a href="{% url 'index' %}">🛍️ Ver tienda</a>
-            <a href="{% url 'admin:logout' %}">🚪 Cerrar sesión</a>
+            <a href="{% url 'dashboard_logout' %}">🚪 Cerrar sesión</a>
         </div>
     </aside>
 

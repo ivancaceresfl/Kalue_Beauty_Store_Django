@@ -16,5 +16,7 @@ urlpatterns = [
     path('dashboard/producto/<int:pk>/variante/agregar/', views.dashboard_agregar_variante, name='dashboard_agregar_variante'),
     path('dashboard/ventas/', views.dashboard_ventas, name='dashboard_ventas'),
     path('dashboard/ventas/registrar/', views.dashboard_registrar_venta, name='dashboard_registrar_venta'),
+    path('dashboard/logout/', views.dashboard_logout, name='dashboard_logout'),
+    path('dashboard/login/', views.dashboard_login, name='dashboard_login'),
     
 ]
