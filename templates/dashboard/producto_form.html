@@ -1,0 +1,130 @@
+{% extends 'dashboard/base_dashboard.html' %}
+
+{% block title %}
+    {% if producto %}Editar{% else %}Agregar{% endif %} Producto — Kalué
+{% endblock %}
+
+{% block page_title %}
+    {% if producto %}✏️ Editar Producto{% else %}➕ Agregar Producto{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div style="display:flex; gap:24px; flex-wrap:wrap; align-items:flex-start"></div>
+
+<div class="form-dashboard">
+    <form method="POST">
+        {% csrf_token %}
+
+        <label>Nombre</label>
+        <input type="text" name="nombre"
+               value="{{ producto.name|default:'' }}" required>
+
+        <label>Marca</label>
+        <input type="text" name="marca"
+               value="{{ producto.brand|default:'' }}" required>
+
+        <label>Descripción corta</label>
+        <input type="text" name="frase"
+               value="{{ producto.short_description|default:'' }}">
+
+        <label>Descripción detallada</label>
+        <textarea name="descripcion" rows="5">{{ producto.detailed_description|default:'' }}</textarea>
+
+        <label>Categoría</label>
+        <select name="subcategoria" required>
+            <option value="">— Selecciona —</option>
+            {% for categoria in categorias %}
+            <optgroup label="{{ categoria.name }}">
+                {% for sub in categoria.subcategories.all %}
+                <option value="{{ sub.id }}"
+                    {% if producto and producto.subcategory_id == sub.id %}selected{% endif %}>
+                    {{ sub.name }}
+                </option>
+                {% endfor %}
+            </optgroup>
+            {% endfor %}
+        </select>
+
+        <label>
+            <input type="checkbox" name="active"
+                   {% if not producto or producto.active %}checked{% endif %}>
+            Producto activo
+        </label>
+
+        {% if not producto %}
+        <hr style="margin:24px 0; border-color:#f0e0e5">
+        <h3 style="color:var(--rosa-oscuro); margin-bottom:16px">Primera variante</h3>
+
+        <label>Color o número (opcional)</label>
+        <input type="text" name="variante" placeholder="Rosa, Tono 01, Sin variante...">
+
+        <label>Precio de venta (Bs.)</label>
+        <input type="number" name="precio" min="0" required>
+
+        <hr style="margin:24px 0; border-color:#f0e0e5">
+        <h3 style="color:var(--rosa-oscuro); margin-bottom:16px">Imágenes</h3>
+
+        <label>URL imagen principal (Cloudinary)</label>
+        <input type="text" name="imagen_principal"
+               placeholder="imagresa la url de la imagen principal aqui...">
+
+        <label>Fotos adicionales — una URL por línea</label>
+        <textarea name="fotos_adicionales" rows="4"
+                  placeholder="ingresa las url aqui..."></textarea>
+        {% endif %}
+
+        <div class="form-actions">
+            <button type="submit" class="btn-primary">
+                {% if producto %}💾 Guardar cambios{% else %}➕ Agregar producto{% endif %}
+            </button>
+            <a href="{% url 'dashboard_productos' %}" class="btn-secondary">Cancelar</a>
+        </div>
+
+    </form>
+</div>
+
+{% if producto %}
+    <div class="form-dashboard" style="flex:1; min-width:280px">
+        <h3 style="color:var(--rosa-oscuro); margin-bottom:16px">
+            🎨 Variantes
+        </h3>
+
+        {% for v in producto.variants.all %}
+        <div style="display:flex; justify-content:space-between; align-items:center;
+                    padding:10px; background:#fff5f7; border-radius:10px; margin-bottom:8px">
+            <div>
+                <strong>{{ v.color_or_number|default:"Sin variante" }}</strong>
+                — Bs. {{ v.selling_price }}
+                <span style="font-size:0.8rem; color:var(--gris)">
+                    (Stock: {{ v.current_stock }})
+                </span>
+            </div>
+            <span class="{% if v.is_available %}badge-disponible{% else %}badge-agotado-small{% endif %}">
+                {% if v.is_available %}✅{% else %}❌{% endif %}
+            </span>
+        </div>
+        {% empty %}
+        <p style="color:var(--gris); font-size:0.9rem">No hay variantes aún.</p>
+        {% endfor %}
+
+        <hr style="margin:16px 0; border-color:#f0e0e5">
+        <h4 style="color:var(--rosa-oscuro); margin-bottom:12px">➕ Nueva variante</h4>
+
+        <form method="POST" action="{% url 'dashboard_agregar_variante' producto.pk %}">
+            {% csrf_token %}
+            <label>Color o número</label>
+            <input type="text" name="color_or_number"
+                   placeholder="Rosa, Tono 01, Sin variante...">
+            <label>Precio de venta (Bs.)</label>
+            <input type="number" name="precio" min="0" required>
+            <div class="form-actions" style="margin-top:16px">
+                <button type="submit" class="btn-primary">Agregar variante</button>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

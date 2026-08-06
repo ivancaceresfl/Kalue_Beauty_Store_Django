@@ -1,0 +1,44 @@
+{% extends 'dashboard/base_dashboard.html' %}
+
+{% block title %}Ventas — Dashboard Kalué{% endblock %}
+{% block page_title %}💰 Ventas{% endblock %}
+
+{% block content %}
+
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
+    <p style="color:var(--gris)">{{ ventas.count }} ventas registradas</p>
+    <a href="{% url 'dashboard_registrar_venta' %}" class="btn-primary">➕ Registrar venta</a>
+</div>
+
+<div class="dashboard-section">
+    <table class="tabla-admin">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Total</th>
+                <th>Descuento</th>
+                <th>Nota</th>
+                <th>Registrado por</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for v in ventas %}
+            <tr>
+                <td>{{ v.created_at|date:"d/m/Y H:i" }}</td>
+                <td><strong>Bs. {{ v.total }}</strong></td>
+                <td>{% if v.discount %}Bs. {{ v.discount }}{% else %}—{% endif %}</td>
+                <td style="color:var(--gris)">{{ v.note|default:"—" }}</td>
+                <td>{{ v.admin.username|default:"—" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align:center; padding:40px; color:#999">
+                    No hay ventas registradas aún.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

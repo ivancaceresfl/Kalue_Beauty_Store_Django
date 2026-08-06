@@ -1,0 +1,39 @@
+{% extends 'dashboard/base_dashboard.html' %}
+
+{% block title %}Registrar Venta — Dashboard Kalué{% endblock %}
+{% block page_title %}➕ Registrar Venta{% endblock %}
+
+{% block content %}
+
+<div class="form-dashboard">
+    <form method="POST">
+        {% csrf_token %}
+
+        <label>Producto y variante</label>
+        <select name="variante" required>
+            <option value="">— Selecciona —</option>
+            {% for v in variantes %}
+            <option value="{{ v.id }}">
+                {{ v.product.name }} — {{ v.product.brand }}
+                — {{ v.color_or_number|default:"Sin variante" }}
+                — Bs. {{ v.selling_price }}
+                (Stock: {{ v.current_stock }})
+            </option>
+            {% endfor %}
+        </select>
+
+        <label>Cantidad vendida</label>
+        <input type="number" name="cantidad" min="1" required>
+
+        <label>Nota (opcional)</label>
+        <input type="text" name="nota"
+               placeholder="ej: cliente frecuente, pedido especial...">
+
+        <div class="form-actions">
+            <button type="submit" class="btn-primary">💰 Registrar venta</button>
+            <a href="{% url 'dashboard_ventas' %}" class="btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

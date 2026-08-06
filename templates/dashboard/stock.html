@@ -1,0 +1,61 @@
+{% extends 'dashboard/base_dashboard.html' %}
+
+{% block title %}Stock — Dashboard Kalué{% endblock %}
+{% block page_title %}📦 Control de Stock{% endblock %}
+
+{% block content %}
+
+<div style="display:flex; justify-content:flex-end; margin-bottom:20px">
+    <a href="{% url 'dashboard_agregar_lote' %}" class="btn-primary">➕ Agregar lote</a>
+</div>
+
+<div class="dashboard-section">
+    <table class="tabla-admin">
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Variante</th>
+                <th>Precio venta</th>
+                <th>Stock actual</th>
+                <th>Lotes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for v in variantes %}
+            <tr>
+                <td><strong>{{ v.product.name }}</strong></td>
+                <td>{{ v.color_or_number|default:"Sin variante" }}</td>
+                <td>Bs. {{ v.selling_price }}</td>
+                <td>
+                    <span class="{% if v.current_stock == 0 %}rojo{% elif v.is_low_stock %}naranja{% else %}verde{% endif %}"
+                          style="font-weight:700; font-size:1.1rem">
+                        {{ v.current_stock }}
+                    </span>
+                </td>
+                <td>
+                    {% if v.current_stock == 0 %}
+                    <span class="badge-agotado-small">❌ Agotado</span>
+                    {% else %}
+                    <span class="badge-disponible">✅ Disponible</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% for lote in v.lots.all %}
+                    <div style="font-size:0.8rem; color:var(--gris)">
+                        Lote #{{ lote.id }} — Costo: Bs.{{ lote.purchase_price }} — Ganancia/u: Bs.{{ lote.profit_per_unit }}
+                    </div>
+                    {% endfor %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align:center; padding:40px; color:#999">
+                    No hay variantes aún.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

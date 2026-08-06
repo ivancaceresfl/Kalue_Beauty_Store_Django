@@ -1,0 +1,75 @@
+{% extends 'dashboard/base_dashboard.html' %}
+
+{% block title %}Productos — Dashboard Kalué{% endblock %}
+{% block page_title %}💄 Productos{% endblock %}
+
+{% block content %}
+
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
+    <p style="color:var(--gris)">{{ productos.count }} productos en total</p>
+    <a href="{% url 'dashboard_agregar' %}" class="btn-primary">➕ Agregar producto</a>
+</div>
+
+<div class="dashboard-section">
+    <table class="tabla-admin">
+        <thead>
+            <tr>
+                <th>Imagen</th>
+                <th>Producto</th>
+                <th>Marca</th>
+                <th>Categoría</th>
+                <th>Variantes</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in productos %}
+            <tr>
+                <td>
+                    {% if p.main_image %}
+                    <img src="{{ p.main_image }}" alt="{{ p.name }}"
+                         style="width:50px; height:50px; object-fit:cover; border-radius:8px">
+                    {% else %}
+                    <div style="width:50px; height:50px; background:#f0e0e5; border-radius:8px"></div>
+                    {% endif %}
+                </td>
+                <td><strong>{{ p.name }}</strong></td>
+                <td>{{ p.brand }}</td>
+                <td>{{ p.subcategory.category.name }} → {{ p.subcategory.name }}</td>
+                <td>
+                    {% for v in p.active_variants %}
+                    <span style="background:var(--rosa); color:white; padding:2px 8px;
+                                 border-radius:10px; font-size:0.75rem; margin:2px">
+                        {{ v.color_or_number|default:"Única" }} — Bs.{{ v.selling_price }}
+                    </span>
+                    {% endfor %}
+                </td>
+                <td>
+                    {% if p.is_available %}
+                    <span class="badge-disponible">✅ Disponible</span>
+                    {% else %}
+                    <span class="badge-agotado-small">❌ Agotado</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div style="display:flex; gap:8px">
+                        <a href="{% url 'dashboard_editar' p.pk %}" class="btn-secondary">✏️ Editar</a>
+                        <a href="{% url 'dashboard_eliminar' p.pk %}" class="btn-danger"
+                           onclick="return confirm('¿Eliminar {{ p.name }}?')">🗑️</a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" style="text-align:center; padding:40px; color:#999">
+                    No hay productos aún.
+                    <a href="{% url 'dashboard_agregar' %}">Agregar el primero</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

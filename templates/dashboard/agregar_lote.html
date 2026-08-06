@@ -1,0 +1,44 @@
+{% extends 'dashboard/base_dashboard.html' %}
+
+{% block title %}Agregar Lote — Dashboard Kalué{% endblock %}
+{% block page_title %}➕ Agregar Lote de Compra{% endblock %}
+
+{% block content %}
+
+<div class="form-dashboard">
+    <form method="POST">
+        {% csrf_token %}
+
+        <label>Producto y variante</label>
+        <select name="variante" required>
+            <option value="">— Selecciona —</option>
+            {% for v in variantes %}
+            <option value="{{ v.id }}">
+                {{ v.product.name }} — {{ v.product.brand }} — {{ v.color_or_number|default:"Sin variante" }}
+                (Stock actual: {{ v.current_stock }})
+            </option>
+            {% endfor %}
+        </select>
+
+        <label>Precio de costo (Bs.) — ¿a cuánto te lo vendieron?</label>
+        <input type="number" name="precio_costo" min="0" required>
+
+        <label>Cantidad de unidades que entraron</label>
+        <input type="number" name="cantidad" min="1" required>
+
+        <label>Fecha de entrada</label>
+        <input type="date" name="fecha" required>
+
+        <label>Notas (opcional)</label>
+        <input type="text" name="notas"
+               placeholder="ej: Proveedor Love Rain, pedido especial...">
+
+        <div class="form-actions">
+            <button type="submit" class="btn-primary">✅ Registrar lote</button>
+            <a href="{% url 'dashboard_stock' %}" class="btn-secondary">Cancelar</a>
+        </div>
+
+    </form>
+</div>
+
+{% endblock %}

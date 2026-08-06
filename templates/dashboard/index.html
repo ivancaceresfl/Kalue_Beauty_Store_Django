@@ -1,0 +1,71 @@
+{% extends 'dashboard/base_dashboard.html' %}
+
+{% block title %}Inicio — Dashboard Kalué{% endblock %}
+{% block page_title %}📊 Resumen{% endblock %}
+
+{% block content %}
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <p class="stat-numero">{{ total_productos }}</p>
+        <p class="stat-label">Total productos</p>
+    </div>
+    <div class="stat-card">
+        <p class="stat-numero verde">{{ total_activos }}</p>
+        <p class="stat-label">Disponibles</p>
+    </div>
+    <div class="stat-card">
+        <p class="stat-numero rojo">{{ total_agotados }}</p>
+        <p class="stat-label">Agotados</p>
+    </div>
+    <div class="stat-card">
+        <p class="stat-numero">Bs. {{ ganancia_total }}</p>
+        <p class="stat-label">Ganancia total</p>
+    </div>
+</div>
+
+<div class="dashboard-section">
+    <h2>Últimos movimientos</h2>
+    <table class="tabla-admin">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Producto</th>
+                <th>Variante</th>
+                <th>Tipo</th>
+                <th>Cantidad</th>
+                <th>Stock anterior</th>
+                <th>Stock nuevo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for m in movimientos %}
+            <tr>
+                <td>{{ m.created_at|date:"d/m/Y H:i" }}</td>
+                <td>{{ m.variant.product.name }}</td>
+                <td>{{ m.variant.color_or_number|default:"Sin variante" }}</td>
+                <td>
+                    {% if m.type == 'entrada' %}
+                    <span class="badge-disponible">📦 Entrada</span>
+                    {% elif m.type == 'venta' %}
+                    <span class="badge-agotado-small">💰 Venta</span>
+                    {% else %}
+                    <span class="badge-ajuste">🔧 {{ m.type }}</span>
+                    {% endif %}
+                </td>
+                <td>{{ m.quantity }}</td>
+                <td>{{ m.previous_stock }}</td>
+                <td>{{ m.new_stock }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align:center; padding:30px; color:#999">
+                    No hay movimientos aún
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

@@ -1,0 +1,55 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dashboard — Kalué{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+<body class="dashboard-body">
+
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <h2>✨ Kalué</h2>
+            <p>Panel Admin</p>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="{% url 'dashboard' %}"
+               class="{% if request.resolver_match.url_name == 'dashboard' %}activo{% endif %}"> 📊 Inicio </a>
+            <a href="{% url 'dashboard_productos' %}"
+               class="{% if 'producto' in request.resolver_match.url_name %}activo{% endif %}"> 💄 Productos </a>
+            <a href="{% url 'dashboard_stock' %}"
+               class="{% if 'stock' in request.resolver_match.url_name %}activo{% endif %}"> 📦 Stock </a>
+            <a href="{% url 'dashboard_historial' %}"
+               class="{% if request.resolver_match.url_name == 'dashboard_historial' %}activo{% endif %}"> 📋 Historial </a>
+            <a href="{% url 'dashboard_ventas' %}"
+               class="{% if 'venta' in request.resolver_match.url_name %}activo{% endif %}"> 💰 Ventas </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="{% url 'index' %}">🛍️ Ver tienda</a>
+            <a href="{% url 'admin:logout' %}">🚪 Cerrar sesión</a>
+        </div>
+    </aside>
+
+    <main class="dashboard-main">
+
+        <div class="dashboard-header">
+            <h1>{% block page_title %}Dashboard{% endblock %}</h1>
+        </div>
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+
+    </main>
+
+</body>
+</html>
