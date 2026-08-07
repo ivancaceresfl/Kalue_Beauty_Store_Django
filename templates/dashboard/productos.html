@@ -16,6 +16,7 @@
     <table class="tabla-admin">
         <thead>
             <tr>
+                <th>#</th>
                 <th>Imagen</th>
                 <th>Producto</th>
                 <th>Marca</th>
@@ -28,6 +29,7 @@
         <tbody>
             {% for p in productos %}
             <tr>
+                <td>{{ p.id }}</td>
                 <td>
                     {% if p.main_image %}
                     <img src="{{ p.main_image }}" alt="{{ p.name }}"
