@@ -59,7 +59,6 @@ def dashboard(request):
 
     ganancia_total = total_ingresos - total_costos
 
-    dinero_acumulado = (ganancia_total + total_costos)
 
     return render(request, 'dashboard/index.html', {
         'total_productos': total_productos,
@@ -70,7 +69,6 @@ def dashboard(request):
         'total_ingresos':   total_ingresos,
         'total_descuentos': total_descuentos,
         'total_costos':     total_costos,
-        'dinero_acumulado': dinero_acumulado,
     })
 
 @vendedor_required
@@ -343,11 +341,6 @@ def dashboard_login(request):
 def dashboard_logout(request):
     logout(request)
     return redirect('dashboard_login')
-
-def dashboard_logout(request):
-    logout(request)
-    return redirect('/admin/login/')
-
 
 admin_required    = user_passes_test(es_admin,            login_url='/dashboard/login/')
 vendedor_required = user_passes_test(es_vendedor_o_admin, login_url='/dashboard/login/')
