@@ -23,12 +23,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'store.apps.StoreConfig',               
+    'store.apps.StoreConfig',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', 
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -42,7 +42,7 @@ ROOT_URLCONF = 'kalue.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -56,45 +56,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'kalue.wsgi.application'
-
-DATABASES = {
-    'default': {
-        'ENGINE':   'django.db.backends.postgresql',
-        'NAME':     os.environ.get('DB_NAME'),
-        'USER':     os.environ.get('DB_USER'),
-        'PASSWORD': os.environ.get('DB_PASSWORD'),
-        'HOST':     os.environ.get('DB_HOST'),
-        'PORT':     os.environ.get('DB_PORT', '5432'),
-    }
-}
-
-AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
-]
-
-LANGUAGE_CODE = 'es-bo'
-TIME_ZONE     = 'America/La_Paz'
-USE_I18N      = True
-USE_TZ        = True
-
-STATIC_URL       = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_ROOT      = BASE_DIR / 'staticfiles'
-
-WHATSAPP_NUMBER = os.environ.get('WHATSAPP_NUMBER', '')
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-
-if not DEBUG:
-    STATIC_ROOT = BASE_DIR / 'staticfiles'
-    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
-
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
@@ -114,3 +75,26 @@ else:
         }
     }
 
+AUTH_PASSWORD_VALIDATORS = [
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+]
+
+LANGUAGE_CODE = 'es-bo'
+TIME_ZONE     = 'America/La_Paz'
+USE_I18N      = True
+USE_TZ        = True
+
+STATIC_URL       = '/static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT      = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+WHATSAPP_NUMBER = os.environ.get('WHATSAPP_NUMBER', '')
+
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_AGE = 28800
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
