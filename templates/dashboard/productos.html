@@ -6,7 +6,7 @@
 {% block content %}
 
 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
-    <p style="color:var(--gris)">{{ productos.count }} productos en total</p>
+    <p style="color:var(--gris)">{{ total_productos }} productos en total</p>
     {% if request.user.is_superuser %}
     <a href="{% url 'dashboard_agregar' %}" class="btn-primary">➕ Agregar producto</a>
     {% endif %}
@@ -42,12 +42,17 @@
                 <td>{{ p.brand }}</td>
                 <td>{{ p.subcategory.category.name }} → {{ p.subcategory.name }}</td>
                 <td>
-                    {% for v in p.active_variants %}
-                    <span style="background:var(--rosa); color:white; padding:2px 8px;
-                                 border-radius:10px; font-size:0.75rem; margin:2px">
-                        {{ v.color_or_number|default:"Única" }} — Bs.{{ v.selling_price }}
-                    </span>
-                    {% endfor %}
+                   <div style="display:flex; flex-direction:column; gap:4px; align-items:flex-start">
+                        {% for v in p.active_variants %}
+                        <span style="background:var(--rosa); color:white; padding:2px 8px;
+                                border-radius:10px; font-size:0.75rem; white-space:nowrap">
+                            {{ v.color_or_number|default:"Única" }} — Bs.{{ v.selling_price }}
+                            {% if not v.is_available %}
+                            <span style="opacity:0.7">(agotado)</span>
+                            {% endif %}
+                        </span>
+                        {% endfor %}
+                    </div>
                 </td>
                 <td>
                     {% if p.is_available %}

@@ -1,10 +1,10 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
 from django.conf import settings
+from django.contrib.auth import authenticate, login, logout
 from .models import (Product, Category, Subcategory, ProductVariant,
                      ProductImage, Stock, PurchaseLot, StockMovement, Sale)
-from django.contrib.auth import authenticate, login,  logout
 
 
 def es_admin(user):
@@ -13,8 +13,8 @@ def es_admin(user):
 def es_vendedor_o_admin(user):
     return user.is_superuser or user.groups.filter(name='Vendedor').exists()
 
-admin_required    = user_passes_test(es_admin,            login_url='/admin/login/')
-vendedor_required = user_passes_test(es_vendedor_o_admin, login_url='/admin/login/')
+admin_required    = user_passes_test(es_admin,            login_url='/dashboard/login/')
+vendedor_required = user_passes_test(es_vendedor_o_admin, login_url='/dashboard/login/')
 
 def index(request):
     productos  = Product.objects.filter(active=True).prefetch_related(
@@ -43,29 +43,45 @@ def producto_detalle(request, pk):
 
 @vendedor_required
 def dashboard(request):
-    productos        = Product.objects.all()
-    total_productos  = productos.count()
-    total_activos    = productos.filter(active=True).count()
-    total_agotados   = sum(1 for p in productos if not p.is_available)
-    movimientos      = StockMovement.objects.select_related('variant__product', 'admin').order_by('-created_at')[:5]
-    variantes        = ProductVariant.objects.prefetch_related('lots').all()
+    productos       = Product.objects.prefetch_related('variants__stock').all()
+    total_productos = productos.count()
+    total_activos   = productos.filter(active=True).count()
 
-    ventas = Sale.objects.all()
-    total_ingresos  = sum(v.total for v in ventas)
-    total_descuentos = sum(v.discount for v in ventas)
+    # Calcula agotados en Python sin consultas extra
+    total_agotados  = sum(
+        1 for p in productos
+        if not any(
+            v.stock.current_quantity > 0
+            for v in p.variants.all()
+            if hasattr(v, 'stock')
+        )
+    )
 
-    movimientos_venta = StockMovement.objects.filter(type='venta').select_related('lot')
-    total_costos = sum(m.quantity * m.lot.purchase_price for m in movimientos_venta)
+    movimientos = StockMovement.objects.select_related(
+        'variant__product', 'admin'
+    ).order_by('-created_at')[:5]
 
+    from django.db.models import Sum
+    ventas_agg    = Sale.objects.aggregate(
+        total_ingresos   = Sum('total'),
+        total_descuentos = Sum('discount')
+    )
+    total_ingresos   = ventas_agg['total_ingresos']   or 0
+    total_descuentos = ventas_agg['total_descuentos'] or 0
+
+    # Costos en una sola consulta
+    movimientos_venta = StockMovement.objects.filter(
+        type='venta'
+    ).select_related('lot')
+    total_costos   = sum(m.quantity * m.lot.purchase_price for m in movimientos_venta)
     ganancia_total = total_ingresos - total_costos
 
-
     return render(request, 'dashboard/index.html', {
-        'total_productos': total_productos,
-        'total_activos':   total_activos,
-        'total_agotados':  total_agotados,
-        'movimientos':     movimientos,
-        'ganancia_total':  ganancia_total,
+        'total_productos':  total_productos,
+        'total_activos':    total_activos,
+        'total_agotados':   total_agotados,
+        'movimientos':      movimientos,
+        'ganancia_total':   ganancia_total,
         'total_ingresos':   total_ingresos,
         'total_descuentos': total_descuentos,
         'total_costos':     total_costos,
@@ -74,10 +90,14 @@ def dashboard(request):
 @vendedor_required
 def dashboard_productos(request):
     productos = Product.objects.prefetch_related(
-        'images', 'variants__stock'
+        'images',
+        'variants',
+        'variants__stock'
     ).select_related('subcategory__category').all()
+
     return render(request, 'dashboard/productos.html', {
-        'productos': productos,
+        'productos':        productos,
+        'total_productos':  productos.count(),  # ← calculado una sola vez
     })
 
 @admin_required
@@ -221,25 +241,34 @@ def dashboard_agregar_variante(request, pk):
 
 @vendedor_required
 def dashboard_ventas(request):
-    ventas = Sale.objects.select_related('admin').order_by('-created_at')
+    from django.db.models import Prefetch
+
+    ventas = Sale.objects.select_related('admin').prefetch_related(
+        Prefetch(
+            'movements',
+            queryset=StockMovement.objects.select_related('lot').filter(type='venta'),
+            to_attr='movimientos_venta'
+        )
+    ).order_by('-created_at')
 
     ventas_con_datos = []
-    total_compras = 0
-    total_ventas  = 0
-    total_ganancias = 0
+    total_compras  = 0
+    total_ventas   = 0
+    total_ganancia = 0
 
     for venta in ventas:
-        movimiento = StockMovement.objects.select_related(
-            'lot', 'variant'
-        ).filter(sale=venta, type='venta').first()
-
         precio_compra = 0
         precio_venta  = venta.total
         ganancia      = 0
-    
-        if movimiento:
+
+        if venta.movimientos_venta:
+            movimiento    = venta.movimientos_venta[0]
             precio_compra = movimiento.lot.purchase_price * movimiento.quantity
             ganancia      = precio_venta - precio_compra
+
+        total_compras  += precio_compra
+        total_ventas   += precio_venta
+        total_ganancia += ganancia
 
         ventas_con_datos.append({
             'venta':         venta,
@@ -249,7 +278,10 @@ def dashboard_ventas(request):
         })
 
     return render(request, 'dashboard/ventas.html', {
-        'ventas': ventas_con_datos,
+        'ventas':          ventas_con_datos,
+        'total_compras':   total_compras,
+        'total_ventas':    total_ventas,
+        'total_ganancia':  total_ganancia,
     })
 @vendedor_required
 def dashboard_registrar_venta(request):
@@ -315,12 +347,6 @@ def dashboard_registrar_venta(request):
         'variantes': variantes,
     })
 
-def es_admin(user):
-    return user.is_superuser
-
-def es_vendedor_o_admin(user):
-    return user.is_superuser or user.groups.filter(name='Vendedor').exists()
-
 def dashboard_login(request):
     if request.user.is_authenticated and es_vendedor_o_admin(request.user):
         return redirect('dashboard')
@@ -341,6 +367,3 @@ def dashboard_login(request):
 def dashboard_logout(request):
     logout(request)
     return redirect('dashboard_login')
-
-admin_required    = user_passes_test(es_admin,            login_url='/dashboard/login/')
-vendedor_required = user_passes_test(es_vendedor_o_admin, login_url='/dashboard/login/')

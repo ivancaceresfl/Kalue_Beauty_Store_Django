@@ -62,7 +62,7 @@ class Product(models.Model):
 
     @property
     def active_variants(self):
-        return self.variants.filter(active=True)
+        return [v for v in self.variants.all() if v.active]
 
     @property
     def is_available(self):
@@ -101,6 +101,9 @@ class ProductVariant(models.Model):
         verbose_name        = 'Variante'
         verbose_name_plural = 'Variantes'
         db_table            = 'productVariant'
+        indexes = [
+        models.Index(fields=['product', 'active']),
+        ]
 
     def __str__(self):
         return f'{self.product.name} — {self.color_or_number or "Sin variante"}'
@@ -268,6 +271,10 @@ class StockMovement(models.Model):
         verbose_name_plural = 'Movimientos de stock'
         db_table            = 'stockMovement'
         ordering            = ['-created_at']
+        indexes = [
+        models.Index(fields=['-created_at']),
+        models.Index(fields=['type']),
+    ]
 
     def __str__(self):
         return f'{self.type} — {self.variant} — {self.quantity} unidades'
