@@ -34,10 +34,14 @@ def producto_detalle(request, pk):
         Product.objects.prefetch_related('images', 'variants__stock'),
         pk=pk, active=True
     )
+    variantes        = producto.active_variants
+    primera_variante = variantes[0] if variantes else None
+
     return render(request, 'producto_detalle.html', {
-        'producto':        producto,
-        'variantes':       producto.active_variants,
-        'whatsapp_number': settings.WHATSAPP_NUMBER,
+        'producto':         producto,
+        'variantes':        variantes,
+        'primera_variante': primera_variante,
+        'whatsapp_number':  settings.WHATSAPP_NUMBER,
     })
 
 

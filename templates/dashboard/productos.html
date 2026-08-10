@@ -28,6 +28,18 @@
         </thead>
         <tbody>
             {% for p in productos %}
+
+            <tr>
+                <td>{{ p.id }}</td>
+                <!-- DEBUG temporal -->
+                <td colspan="7">
+                    {% for v in p.active_variants %}
+                        {{ v.color_or_number }} — Bs.{{ v.selling_price }} |
+                    {% endfor %}
+                </td>
+            </tr>
+            {% endfor %}
+
             <tr>
                 <td>{{ p.id }}</td>
                 <td>

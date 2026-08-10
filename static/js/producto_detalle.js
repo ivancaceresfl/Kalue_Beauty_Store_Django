@@ -18,3 +18,9 @@ function seleccionarVariante(el) {
     const mensaje = encodeURIComponent(`Hola! Me interesa: ${PRODUCTO} — ${variante}`);
     document.getElementById('btnWhatsapp').href = `https://wa.me/${WHATSAPP}?text=${mensaje}`;
 }
+document.addEventListener('DOMContentLoaded', function() {
+    const primeraVariante = document.querySelector('.variante-btn');
+    if (primeraVariante) {
+        seleccionarVariante(primeraVariante);
+    }
+});

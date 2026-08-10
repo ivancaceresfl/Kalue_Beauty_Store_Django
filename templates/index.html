@@ -73,7 +73,9 @@
                 <p class="frase">{{ producto.short_description }}</p>
                 {% if producto.active_variants %}
                 <p class="precio">
-                    Bs. {{ producto.active_variants.first.selling_price }}
+                    {% with variante=producto.active_variants|first %}
+                    {% if variante %}Bs. {{ variante.selling_price }}{% endif %}
+                    {% endwith %}
                 </p>
                 {% endif %}
             </div>

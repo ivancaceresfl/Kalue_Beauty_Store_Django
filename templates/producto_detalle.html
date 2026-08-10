@@ -50,7 +50,9 @@
         {% endif %}
 
         <p class="detalle-precio" id="precioActual">
-            Bs. {{ variantes.first.selling_price }}
+            {% if primera_variante %}
+            Bs. {{ primera_variante.selling_price }}
+            {% endif %}
         </p>
 
         <p class="detalle-disponible" id="disponibilidad">
