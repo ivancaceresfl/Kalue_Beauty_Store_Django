@@ -29,7 +29,7 @@
         <tbody>
             {% for p in productos %}
 
-                <td>{{ p.id }}</td>
+                <td>{{ forloop.counter }}</td>
                 <td>
                     {% if p.main_image %}
                     <img src="{{ p.main_image }}" alt="{{ p.name }}"

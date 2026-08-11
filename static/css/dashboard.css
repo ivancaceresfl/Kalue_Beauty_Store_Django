@@ -248,3 +248,16 @@
 .dashboard-section {
     overflow-x: auto;
 }
+.tabla-admin th[title] {
+    user-select: none;
+}
+
+.tabla-admin th[title]:hover {
+    background: var(--rosa);
+    transition: background 0.2s;
+}
+
+.orden-icono {
+    font-size: 0.75rem;
+    margin-left: 4px;
+}
