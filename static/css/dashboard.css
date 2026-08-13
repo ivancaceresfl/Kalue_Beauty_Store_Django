@@ -1,21 +1,26 @@
-.dashboard-body {
-    display: flex;
-    min-height: 100vh;
-    background: #f8f0f3;
-    font-family: 'Lato', sans-serif;
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Lato:wght@300;400&display=swap');
+
+*, *::before, *::after {
+  font-family: 'Lato', sans-serif !important;
 }
 
+.dashboard-body {
+    min-height: 100vh;
+    background: #f8f0f3;
+}
+
+/* ===== SIDEBAR ===== */
 .sidebar {
-    width: 240px;
+    width: 150px;
     background: var(--rosa-oscuro);
     color: white;
     display: flex;
     flex-direction: column;
-    padding: 30px 0;
+    padding: 50px 0;
     position: fixed;
-    height: 100vh;
     top: 0;
     left: 0;
+    height: 100vh;
 }
 
 .sidebar-logo {
@@ -25,9 +30,9 @@
 }
 
 .sidebar-logo h2 {
-    font-family: 'Playfair Display', serif;
     font-size: 1.5rem;
     margin-bottom: 4px;
+    text-align: center;
 }
 
 .sidebar-logo p {
@@ -77,22 +82,23 @@
     opacity: 1;
 }
 
+/* ===== LAYOUT PRINCIPAL ===== */
 .dashboard-main {
-    margin-left: 240px;
-    flex: 1;
-    padding: 30px;
+    margin-left: 150px;
+    padding: 10px;
+    box-sizing: border-box;
 }
 
 .dashboard-header {
-    margin-bottom: 30px;
+    margin-bottom: 15px;
 }
 
 .dashboard-header h1 {
-    font-family: 'Playfair Display', serif;
     color: var(--rosa-oscuro);
-    font-size: 1.8rem;
+    font-size: 1.2rem;
 }
 
+/* ===== ESTADÍSTICAS ===== */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -115,24 +121,26 @@
     margin-bottom: 6px;
 }
 
-.stat-numero.verde  { color: #2ecc71; }
-.stat-numero.rojo   { color: #e74c3c; }
+.stat-numero.verde { color: #2ecc71; }
+.stat-numero.rojo  { color: #e74c3c; }
 
 .stat-label {
     font-size: 0.85rem;
     color: var(--gris);
 }
 
+/* ===== SECCIONES / ALERTAS ===== */
 .dashboard-section {
     background: white;
     border-radius: 16px;
     padding: 24px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.06);
     margin-bottom: 24px;
+    overflow-x: auto;
+    position: relative;
 }
 
 .dashboard-section h2 {
-    font-family: 'Playfair Display', serif;
     color: var(--rosa-oscuro);
     margin-bottom: 20px;
     font-size: 1.2rem;
@@ -147,10 +155,11 @@
     font-size: 0.95rem;
 }
 
+/* ===== BOTONES / BADGES ===== */
 .btn-primary {
     background: var(--rosa-oscuro);
     color: white;
-    padding: 10px 20px;
+    padding: 5px 5px;
     border-radius: 25px;
     text-decoration: none;
     font-size: 0.9rem;
@@ -191,11 +200,12 @@
     font-size: 0.8rem;
 }
 
+/* ===== FORMULARIOS ===== */
 .form-dashboard {
     background: white;
     border-radius: 16px;
     padding: 30px;
-    max-width: 900px;
+    max-width: 1000px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.06);
 }
 
@@ -229,15 +239,22 @@
 .form-dashboard .form-actions {
     margin-top: 24px;
     display: flex;
-    gap: 12px;  
+    gap: 12px;
+}
+
+/* ===== TABLA ADMIN ===== */
+.tabla-admin {
+    width: 100%;
+    border-collapse: collapse;
 }
 
 .tabla-admin th,
 .tabla-admin td {
-    padding: 14px 20px;
+    padding: 5px 5px;
     white-space: nowrap;
     text-align: center;
 }
+
 .tabla-admin td.razon {
     max-width: 200px;
     white-space: normal;
@@ -245,9 +262,7 @@
     font-size: 0.85rem;
     color: var(--gris);
 }
-.dashboard-section {
-    overflow-x: auto;
-}
+
 .tabla-admin th[title] {
     user-select: none;
 }
@@ -260,4 +275,39 @@
 .orden-icono {
     font-size: 0.75rem;
     margin-left: 4px;
+}
+
+.tabla-admin thead th {
+    position: sticky;
+    top: 0;
+    background: var(--rosa-oscuro);
+    z-index: 10;
+}
+
+/* ===== WRAPPER DE TABLA (scroll interno) ===== */
+.tabla-wrapper {
+    overflow-x: scroll;
+    overflow-y: auto;
+    max-height: 71vh;
+    border-radius: 5px;
+}
+
+/* Scroll HORIZONTAL Y VERTICAL (ambos visibles) */
+.tabla-wrapper::-webkit-scrollbar {
+    height: 10px;
+    width: 8px;
+}
+
+.tabla-wrapper::-webkit-scrollbar-track {
+    background: #f0e0e5;
+    border-radius: 5px;
+}
+
+.tabla-wrapper::-webkit-scrollbar-thumb {
+    background: var(--rosa);
+    border-radius: 5px;
+}
+
+.tabla-wrapper::-webkit-scrollbar-thumb:hover {
+    background: var(--rosa-oscuro);
 }
