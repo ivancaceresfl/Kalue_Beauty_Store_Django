@@ -431,7 +431,7 @@ main h2 {
 }
 
 /* ===== RESPONSIVE ===== */
-@media (max-width: 800px) {
+@media (max-width: 600px) {
     .detalle-container {
         flex-direction: column;
     }

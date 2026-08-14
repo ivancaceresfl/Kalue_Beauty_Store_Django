@@ -18,5 +18,7 @@ urlpatterns = [
     path('dashboard/ventas/registrar/', views.dashboard_registrar_venta, name='dashboard_registrar_venta'),
     path('dashboard/logout/', views.dashboard_logout, name='dashboard_logout'),
     path('dashboard/login/', views.dashboard_login, name='dashboard_login'),
-    
+    path('dashboard/gastos/', views.dashboard_gastos, name='dashboard_gastos'),
+    path('dashboard/gastos/agregar/', views.dashboard_agregar_gasto, name='dashboard_agregar_gasto'),
+    path('dashboard/gastos/eliminar/<int:pk>/', views.dashboard_eliminar_gasto, name='dashboard_eliminar_gasto'),
 ]

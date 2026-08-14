@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from .models import (Product, Category, Subcategory, ProductVariant,
-                     ProductImage, Stock, PurchaseLot, StockMovement, Sale)
+                     ProductImage, Stock, PurchaseLot, StockMovement, Sale, GastoExtra)
 
 
 def es_admin(user):
@@ -47,11 +47,12 @@ def producto_detalle(request, pk):
 
 @vendedor_required
 def dashboard(request):
+
+    from django.db.models import Sum
+
     productos       = Product.objects.prefetch_related('variants__stock').all()
     total_productos = productos.count()
     total_activos   = productos.filter(active=True).count()
-
-    # Calcula agotados en Python sin consultas extra
     total_agotados  = sum(
         1 for p in productos
         if not any(
@@ -78,7 +79,11 @@ def dashboard(request):
         type='venta'
     ).select_related('lot')
     total_costos   = sum(m.quantity * m.lot.purchase_price for m in movimientos_venta)
-    ganancia_total = total_ingresos - total_costos
+
+    gastos_agg    = GastoExtra.objects.aggregate(total=Sum('monto'))
+    total_gastos  = gastos_agg['total'] or 0
+
+    ganancia_total = total_ingresos - total_costos - total_gastos
 
     return render(request, 'dashboard/index.html', {
         'total_productos':  total_productos,
@@ -89,6 +94,7 @@ def dashboard(request):
         'total_ingresos':   total_ingresos,
         'total_descuentos': total_descuentos,
         'total_costos':     total_costos,
+        'total_gastos':     total_gastos,
     })
 
 @vendedor_required
@@ -371,3 +377,34 @@ def dashboard_login(request):
 def dashboard_logout(request):
     logout(request)
     return redirect('dashboard_login')
+
+@admin_required
+def dashboard_gastos(request):
+    gastos = GastoExtra.objects.select_related('admin').all()
+    total  = sum(g.monto for g in gastos)
+    return render(request, 'dashboard/gastos.html', {
+        'gastos': gastos,
+        'total':  total,
+    })
+
+@admin_required
+def dashboard_agregar_gasto(request):
+    if request.method == 'POST':
+        GastoExtra.objects.create(
+            monto  = int(request.POST['monto']),
+            tipo   = request.POST['tipo'],
+            motivo = request.POST['motivo'],
+            fecha  = request.POST['fecha'],
+            admin  = request.user
+        )
+        messages.success(request, '✅ Gasto registrado correctamente')
+        return redirect('dashboard_gastos')
+
+    return render(request, 'dashboard/agregar_gasto.html')
+
+@admin_required
+def dashboard_eliminar_gasto(request, pk):
+    gasto = get_object_or_404(GastoExtra, pk=pk)
+    gasto.delete()
+    messages.success(request, '🗑️ Gasto eliminado')
+    return redirect('dashboard_gastos')

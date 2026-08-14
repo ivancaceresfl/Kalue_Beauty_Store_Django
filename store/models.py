@@ -278,3 +278,33 @@ class StockMovement(models.Model):
 
     def __str__(self):
         return f'{self.type} — {self.variant} — {self.quantity} unidades'
+
+
+class GastoExtra(models.Model):
+    TIPOS = [
+        ('envio',   'Envío'),
+        ('bolsas',  'Bolsas'),
+        ('regalo',  'Regalo'),
+        ('otro',    'Otro'),
+    ]
+
+    monto      = models.IntegerField()
+    tipo       = models.CharField(max_length=20, choices=TIPOS, default='otro')
+    motivo     = models.CharField(max_length=200)
+    fecha      = models.DateField()
+    admin      = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='gastos'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name        = 'Gasto extra'
+        verbose_name_plural = 'Gastos extras'
+        db_table            = 'gastoExtra'
+        ordering            = ['-fecha']
+
+    def __str__(self):
+        return f'{self.tipo} — Bs.{self.monto} — {self.fecha}'

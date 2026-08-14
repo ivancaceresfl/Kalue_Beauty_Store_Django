@@ -1,0 +1,37 @@
+{% extends 'dashboard/base_dashboard.html' %}
+
+{% block title %}Agregar Gasto — Dashboard Kalué{% endblock %}
+{% block page_title %}➕ Agregar Gasto Extra{% endblock %}
+
+{% block content %}
+
+<div class="form-dashboard">
+    <form method="POST">
+        {% csrf_token %}
+
+        <label>Tipo de gasto</label>
+        <select name="tipo" required>
+            <option value="envio">🚚 Envío</option>
+            <option value="bolsas">🛍️ Bolsas</option>
+            <option value="regalo">🎁 Regalo</option>
+            <option value="otro">📝 Otro</option>
+        </select>
+
+        <label>Motivo</label>
+        <input type="text" name="motivo" required
+               placeholder="ej: Envío a Santa Cruz, bolsas navideñas...">
+
+        <label>Monto (Bs.)</label>
+        <input type="number" name="monto" min="0" required>
+
+        <label>Fecha</label>
+        <input type="date" name="fecha" required>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-primary">💾 Guardar gasto</button>
+            <a href="{% url 'dashboard_gastos' %}" class="btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

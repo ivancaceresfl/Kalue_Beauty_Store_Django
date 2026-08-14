@@ -31,6 +31,12 @@
         <p class="stat-label">Descuentos dados</p>
     </div>
     <div class="stat-card">
+        <p class="stat-numero rojo">Bs. {{ total_gastos }}</p>
+        <p class="stat-label">Gastos Extra</p>
+        <a href="{% url 'dashboard_gastos' %}"
+           style="font-size:0.8rem; color:var(--rosa-oscuro)">Ver detalle →</a>
+    </div>
+    <div class="stat-card">
         <p class="stat-numero">Bs. {{ ganancia_total }}</p>
         <p class="stat-label">Ganancia Real</p>
     </div>

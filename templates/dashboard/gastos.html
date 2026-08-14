@@ -1,0 +1,60 @@
+{% extends 'dashboard/base_dashboard.html' %}
+
+{% block title %}Gastos Extras — Dashboard Kalué{% endblock %}
+{% block page_title %}💸 Gastos Extras{% endblock %}
+
+{% block content %}
+
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
+    <p style="color:var(--gris)">Total gastos: <strong>Bs. {{ total }}</strong></p>
+    <a href="{% url 'dashboard_agregar_gasto' %}" class="btn-primary">➕ Agregar gasto</a>
+</div>
+
+<div class="dashboard-section">
+    <div class="tabla-wrapper">
+        <table class="tabla-admin">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Tipo</th>
+                    <th>Motivo</th>
+                    <th>Monto</th>
+                    <th>Registrado por</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for g in gastos %}
+                <tr>
+                    <td>{{ g.fecha|date:"d/m/Y" }}</td>
+                    <td>
+                        {% if g.tipo == 'envio' %}🚚
+                        {% elif g.tipo == 'bolsas' %}🛍️
+                        {% elif g.tipo == 'regalo' %}🎁
+                        {% else %}📝{% endif %}
+                        {{ g.get_tipo_display }}
+                    </td>
+                    <td>{{ g.motivo }}</td>
+                    <td><strong>Bs. {{ g.monto }}</strong></td>
+                    <td>{{ g.admin.username|default:"—" }}</td>
+                    <td>
+                        <a href="{% url 'dashboard_eliminar_gasto' g.pk %}"
+                           class="btn-danger"
+                           onclick="return confirm('¿Eliminar este gasto?')">
+                           🗑️
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align:center; padding:40px; color:#999">
+                        No hay gastos registrados aún.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
