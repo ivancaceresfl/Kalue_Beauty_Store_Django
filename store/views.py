@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from .models import (Product, Category, Subcategory, ProductVariant,
                      ProductImage, Stock, PurchaseLot, StockMovement, Sale, GastoExtra)
+from django.db.models import Prefetch
 
 
 def es_admin(user):
@@ -256,7 +257,7 @@ def dashboard_ventas(request):
     ventas = Sale.objects.select_related('admin').prefetch_related(
         Prefetch(
             'movements',
-            queryset=StockMovement.objects.select_related('lot').filter(type='venta'),
+            queryset=StockMovement.objects.select_related('lot', 'variant__product').filter(type='venta'),
             to_attr='movimientos_venta'
         )
     ).order_by('-created_at')

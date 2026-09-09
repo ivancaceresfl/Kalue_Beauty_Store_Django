@@ -15,6 +15,8 @@
         <thead>
             <tr>
                 <th>Fecha</th>
+                <th>producto</th>
+                <th>Variante</th>
                 <th>Precio de compra</th>
                 <th>Precio de venta</th>
                 <th>Descuento</th>
@@ -27,6 +29,16 @@
             {% for v in ventas %}
             <tr>
                 <td>{{ v.venta.created_at|date:"d/m/Y H:i" }}</td>
+                <td>
+                    {% if item.venta.movimientos_venta %}
+                    {{ item.venta.movimientos_venta.0.variant.product.name }}
+                    {% else %}—{% endif %}
+                </td>
+                <td>
+                    {% if item.venta.movimientos_venta %}
+                    {{ item.venta.movimientos_venta.0.variant.color_or_number|default:"Única" }}
+                    {% else %}—{% endif %}
+                </td>
                 <td>Bs. {{ v.precio_compra }}</td>
                 <td><strong>Bs. {{ v.precio_venta }}</strong></td>
                 <td>{% if v.venta.discount %}Bs. {{ v.venta.discount }}{% else %}—{% endif %}</td>
